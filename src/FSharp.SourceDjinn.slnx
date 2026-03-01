@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Tests/">
+    <Project Path="FSharp.SourceDjinn.Tests/FSharp.SourceDjinn.Tests.fsproj" />
+  </Folder>
+  <Project Path="FSharp.SourceDjinn.TypeModel/FSharp.SourceDjinn.TypeModel.fsproj" />
+  <Project Path="FSharp.SourceDjinn/FSharp.SourceDjinn.fsproj" />
+</Solution>
