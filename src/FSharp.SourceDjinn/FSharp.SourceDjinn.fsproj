@@ -7,16 +7,24 @@
 		<Description>F# source generation engine</Description>
 		<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
 		<Authors>Jordan Marr</Authors>
-		<Version>0.1.0</Version>
-		<PackageTags></PackageTags>
+		<Version>0.1.1</Version>
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<IncludeAnalyzer>true</IncludeAnalyzer>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
-	
 
+	<!-- Development: use project reference -->
+	<ItemGroup Condition="'$(IsPack)' != 'true'">
+		<ProjectReference Include="..\FSharp.SourceDjinn.TypeModel\FSharp.SourceDjinn.TypeModel.fsproj" />
+	</ItemGroup>
+	
+	<!-- Packing: use package reference -->
+	<ItemGroup Condition="'$(IsPack)' == 'true'">
+		<PackageReference Include="FSharp.SourceDjinn.TypeModel" Version="0.1.x" PrivateAssets="all" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<Compile Include="TypeKindExtractor.fs" />
 		<Compile Include="AstParser.fs" />
@@ -27,17 +35,10 @@
 
 	<ItemGroup>
 		<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.dll" />
-		<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.TypeModel.dll" />
-		<Analyzer Include="$(OutputPath)FSharp.Compiler.Service.dll" />
-		<Analyzer Include="$(OutputPath)FSharp.Core.dll" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FSharp.Compiler.Service" Version="43.10.103" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\FSharp.SourceDjinn.TypeModel\FSharp.SourceDjinn.TypeModel.fsproj" PrivateAssets="all" />
 	</ItemGroup>
 
 </Project>

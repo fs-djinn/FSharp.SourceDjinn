@@ -1,13 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-  <ItemGroup>
-    <Compile Include="EntryPointAttribute.fs" />
-    <Compile Include="TypeModel.fs" />
-  </ItemGroup>
+		<PackageId>FSharp.SourceDjinn.TypeModel</PackageId>
+		<Version>0.1.0</Version>
+		<Description>Type model used by FSharp.SourceDjinn for representing F# types.</Description>
+		<Authors>Jordan Marr</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
+
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeBuildOutput>true</IncludeBuildOutput>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Include="EntryPointAttribute.fs" />
+		<Compile Include="TypeModel.fs" />
+	</ItemGroup>
 
 </Project>
