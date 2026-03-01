@@ -1,6 +1,6 @@
 namespace FSharp.SourceDjinn
 
-open FSharp.SourceDjinn.Types
+open FSharp.SourceDjinn.TypeModel.Types
 
 module AstParser =
 
