@@ -4,12 +4,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>FSharp.SourceDjinn</PackageId>
-	<Description></Description>
+	<Description>F# source generation engine</Description>
+	<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
 	<Authors>Jordan Marr</Authors>
     <Version>0.1.0</Version>
 	<PackageTags></PackageTags>
     <IsPackable>true</IsPackable>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>true</IncludeBuildOutput>
+	<IncludeAnalyzer>true</IncludeAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,10 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="analyzers\dotnet\fs\FSharp.SourceDjinn.TypeModel.dll" Pack="true" PackagePath="analyzers/dotnet/fs" />
-    <None Include="analyzers\dotnet\fs\FSharp.SourceDjinn.dll" Pack="true" PackagePath="analyzers/dotnet/fs" />
-    <None Include="analyzers\dotnet\fs\FSharp.Core.dll" Pack="true" PackagePath="analyzers/dotnet/fs" />
-    <None Include="analyzers\dotnet\fs\FSharp.Compiler.Service.dll" Pack="true" PackagePath="analyzers/dotnet/fs" />
+  	<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.dll" />
+  	<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.TypeModel.dll" />
+  	<Analyzer Include="$(OutputPath)FSharp.Compiler.Service.dll" />
+  	<Analyzer Include="$(OutputPath)FSharp.Core.dll" />
   </ItemGroup>
 
   <ItemGroup>
