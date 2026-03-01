@@ -1,41 +1,43 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageId>FSharp.SourceDjinn</PackageId>
-	<Description>F# source generation engine</Description>
-	<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
-	<Authors>Jordan Marr</Authors>
-    <Version>0.1.0</Version>
-	<PackageTags></PackageTags>
-    <IsPackable>true</IsPackable>
-	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IncludeBuildOutput>true</IncludeBuildOutput>
-	<IncludeAnalyzer>true</IncludeAnalyzer>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<PackageId>FSharp.SourceDjinn</PackageId>
+		<Description>F# source generation engine</Description>
+		<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
+		<Authors>Jordan Marr</Authors>
+		<Version>0.1.0</Version>
+		<PackageTags></PackageTags>
+		<IsPackable>true</IsPackable>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<IncludeBuildOutput>true</IncludeBuildOutput>
+		<IncludeAnalyzer>true</IncludeAnalyzer>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+	
 
-  <ItemGroup>
-    <Compile Include="TypeKindExtractor.fs" />
-    <Compile Include="AstParser.fs" />
-    <Compile Include="EntryPointDetector.fs" />
-    <Compile Include="Conventions.fs" />
-    <Compile Include="EntryPointEmitter.fs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="TypeKindExtractor.fs" />
+		<Compile Include="AstParser.fs" />
+		<Compile Include="EntryPointDetector.fs" />
+		<Compile Include="Conventions.fs" />
+		<Compile Include="EntryPointEmitter.fs" />
+	</ItemGroup>
 
-  <ItemGroup>
-  	<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.dll" />
-  	<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.TypeModel.dll" />
-  	<Analyzer Include="$(OutputPath)FSharp.Compiler.Service.dll" />
-  	<Analyzer Include="$(OutputPath)FSharp.Core.dll" />
-  </ItemGroup>
+	<ItemGroup>
+		<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.dll" />
+		<Analyzer Include="$(OutputPath)FSharp.SourceDjinn.TypeModel.dll" />
+		<Analyzer Include="$(OutputPath)FSharp.Compiler.Service.dll" />
+		<Analyzer Include="$(OutputPath)FSharp.Core.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FSharp.Compiler.Service" Version="43.10.103" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FSharp.Compiler.Service" Version="43.10.103" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FSharp.SourceDjinn.TypeModel\FSharp.SourceDjinn.TypeModel.fsproj" PrivateAssets="all" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\FSharp.SourceDjinn.TypeModel\FSharp.SourceDjinn.TypeModel.fsproj" PrivateAssets="all" />
+	</ItemGroup>
 
 </Project>
