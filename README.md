@@ -120,6 +120,12 @@ All projects live under the **fs‑djinn** GitHub organization.
 
 ---
 
+### 🎩 Acknowledgments
+A special hat tip to Dave Thomas and his work on [Myriad](https://github.com/MoiraeSoftware/myriad). Myriad was one of the first projects to show how flexible and expressive F# metaprogramming could be — taking arbitrary inputs (including F# code) and generating idiomatic F# constructs such as records and discriminated unions, all through a plugin‑based code‑generation flow. 
+SourceDjinn follows in that lineage, focusing on attribute‑driven generation while carrying forward the spirit of making compile‑time F# tooling more accessible.
+
+---
+
 ### 📄 License  
 MIT
 
