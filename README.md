@@ -1,34 +1,42 @@
-### ✨ FSharp.SourceDjinn  
-A lightweight, intention‑revealing **F# source generation engine**.  
-Djinn extracts **syntactic metadata** from F# code — types, attributes, modules, entry points — and presents it through a clean, backend‑agnostic model that analyzers and code generators can build on.
+# FSharp.SourceDjinn  
+[![NuGet](https://img.shields.io/nuget/v/FSharp.SourceDjinn.svg)](https://www.nuget.org/packages/FSharp.SourceDjinn/)
 
-Djinn powers the [**Serde.FS**](https://github.com/fs-djinn/Serde.FS) ecosystem, but it is fully independent and suitable for any F# source generator.
+A lightweight engine for extracting a **simplified, stable type model** from F# source code. Djinn is designed for source generators that scan code for **custom marker attributes** and generate code based on the types that carry them.
+
+Djinn focuses on **syntax**, not semantics. It parses F# source files and produces a backend‑agnostic model of modules, namespaces, records, unions, fields, and attributes — far simpler to work with than the full FCS AST.
 
 ---
 
-### 🚀 What Djinn provides
+### ✨ What Djinn provides
+
 - Fast, dependency‑light F# AST parsing  
-- Stable type model extraction for records, unions, modules, and namespaces  
-- Attribute and constructor argument extraction (including `typeof<T>`)  
-- Entry point detection via `[<EntryPoint>]` or `FSharp.SourceDjinn.EntryPoint`  
-- Convention‑driven helpers for emitting F# code  
+- A clean, stable type model for:
+  - records  
+  - discriminated unions  
+  - modules and namespaces  
+  - fields and union cases  
+  - attributes and constructor/named arguments (including `typeof<T>`)  
+- Entry point detection via a custom marker attribute  
+- Helpers for generating F# code from conventions  
 - Analyzer‑friendly packaging (ships as a Roslyn analyzer)
 
-Djinn focuses on **syntax**, not semantics — it does not interpret types, resolve symbols, or perform type checking. This keeps it fast, predictable, and easy to embed.
+Djinn does **not** perform type checking or symbol resolution. It stays purely syntactic so generators can layer their own semantics on top.
 
 ---
 
-### 📦 Installing
+### 📦 Installation
 
 ```xml
 <PackageReference Include="FSharp.SourceDjinn" Version="0.1.4" PrivateAssets="all" />
 ```
 
-Djinn is intended for use inside analyzers and source generators, not as a runtime dependency.
+Djinn is intended for analyzers and source generators, not runtime use.
 
 ---
 
-### 🧪 Basic example: extracting types
+### 🧪 Example: scanning for a custom attribute
+
+This example shows the core use case: extracting a simplified type model and finding types marked with your generator’s attribute.
 
 ```fsharp
 open FSharp.SourceDjinn
@@ -36,37 +44,71 @@ open FSharp.SourceDjinn
 let source = """
 module App
 
+[<Generate>]
 type Person = { Name: string; Age: int }
 """
 
 let types = TypeModel.extract "/test.fs" source
 
 for t in types do
-    printfn "Found type: %s" t.Name
+    if t.HasAttribute "Generate" then
+        printfn "Found type: %s" t.FullName
+        for f in t.Fields do
+            printfn "  Field: %s : %s" f.Name f.TypeName
 ```
 
-Output:
+**Output:**
 
 ```
-Found type: Person
+Found type: App.Person
+  Field: Name : string
+  Field: Age : int
 ```
+
+This is the heart of Djinn: turn F# source into a clean, usable model for your generator.
+
+---
+
+### ⚡ Custom `EntryPoint` attribute
+
+F# has a unique rule: the real `[<EntryPoint>]` function must appear **last in the compilation order**. Source generators run **before** compilation and cannot control file ordering, so they cannot safely generate a real entry point.
+
+To solve this, Djinn provides a lightweight marker attribute:
+
+```fsharp
+[<FSharp.SourceDjinn.EntryPoint>]
+```
+
+This attribute is **not** the real entry point. Instead, it tells your generator:
+
+> “This is the function the generator should wrap in the actual `[<EntryPoint>]` function it emits.”
+
+Djinn’s `EntryPointDetector` picks up this attribute during extraction so generators can reliably locate the user’s intended entry point.
+
+Generators typically:
+
+- scan for `[<FSharp.SourceDjinn.EntryPoint>]`
+- generate a real `[<EntryPoint>]` function in a separate file
+- call the user’s function from that generated entry point
+
+This keeps user code clean while ensuring the generated entry point appears in the correct place in the compilation order.
 
 ---
 
 ### 🧩 Architecture overview
 
-Djinn is built around four small, composable components:
+Djinn is composed of small, focused components:
 
 - **AstParser** — parses F# source into a simplified AST  
-- **TypeModel** — extracts records, unions, modules, namespaces, and attributes  
+- **TypeModel** — extracts types, fields, union cases, attributes, and module paths  
 - **EntryPointDetector** — finds top‑level entry points  
-- **Emitter** — helps generate F# code from conventions  
+- **Emitter** — helps generate F# code using conventions  
 
-These components are intentionally minimal so higher‑level libraries (like Serde.FS) can layer semantics and code generation on top.
+These components are intentionally minimal so higher‑level libraries can layer semantics and code generation on top.
 
 ---
 
-### 📚 Ecosystem
+### 🌱 Ecosystem
 
 Projects built on Djinn:
 
