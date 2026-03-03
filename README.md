@@ -1,5 +1,6 @@
 # FSharp.SourceDjinn  
-[![NuGet](https://img.shields.io/nuget/v/FSharp.SourceDjinn.svg)](https://www.nuget.org/packages/FSharp.SourceDjinn/)
+[![Serde.FS](https://img.shields.io/nuget/vpre/FSharp.SourceDjinn.svg?label=FSharp.SourceDjinn)](https://www.nuget.org/packages/FSharp.SourceDjinn/)
+[![Serde.FS.SourceGen](https://img.shields.io/nuget/vpre/FSharp.SourceDjinn.TypeModel.svg?label=FSharp.SourceDjinn.TypeModel)](https://www.nuget.org/packages/FSharp.SourceDjinn.TypeModel/)
 
 A lightweight engine for extracting a **simplified, stable type model** from F# source code. Djinn is designed for source generators that scan code for **custom marker attributes** and generate code based on the types that carry them.
 
@@ -120,7 +121,7 @@ All projects live under the **fs‑djinn** GitHub organization.
 
 ---
 
-### 🎩 Acknowledgments
+### ❤️ Acknowledgments
 A special hat tip to Dave Thomas and his work on [Myriad](https://github.com/MoiraeSoftware/myriad). Myriad was one of the first projects to show how flexible and expressive F# metaprogramming could be — taking arbitrary inputs (including F# code) and generating idiomatic F# constructs such as records and discriminated unions, all through a plugin‑based code‑generation flow. 
 SourceDjinn follows in that lineage, focusing on attribute‑driven generation while carrying forward the spirit of making compile‑time F# tooling more accessible.
 
