@@ -10,8 +10,14 @@ module EntryPointEmitter =
         "\n" +
         "    let tryConventionBootstrap () =\n" +
         "        try\n" +
-        "            let asm = System.Reflection.Assembly.GetEntryAssembly()\n" +
-        "            if not (isNull asm) then\n" +
+        "            // Ensure referenced assemblies are loaded\n" +
+        "            let entry = System.Reflection.Assembly.GetEntryAssembly()\n" +
+        "            if not (isNull entry) then\n" +
+        "                for name in entry.GetReferencedAssemblies() do\n" +
+        "                    try System.Reflection.Assembly.Load(name) |> ignore with _ -> ()\n" +
+        "\n" +
+        "            // Search all loaded assemblies for the convention bootstrap\n" +
+        "            for asm in System.AppDomain.CurrentDomain.GetAssemblies() do\n" +
         "                match asm.GetType(\"" + Conventions.ConventionBootstrapType + "\") with\n" +
         "                | null -> ()\n" +
         "                | ty ->\n" +
