@@ -46,6 +46,9 @@ module TypeKindExtractor =
         if name.EndsWith("Attribute") then name
         else name + "Attribute"
 
+    type AttrArgValue =
+        | TypeOf of string
+
     let private extractObjConst (expr: SynExpr) : obj option =
         match expr with
         | SynExpr.Const(SynConst.String(s, _, _), _) -> Some (box s)
@@ -55,6 +58,15 @@ module TypeKindExtractor =
         | SynExpr.Const(SynConst.Single f, _) -> Some (box f)
         | SynExpr.Const(SynConst.Int64 i, _) -> Some (box i)
         | SynExpr.Const(SynConst.Char c, _) -> Some (box c)
+        | SynExpr.TypeApp(SynExpr.Ident ident, _, typeArgs, _, _, _, _) when ident.idText = "typeof" ->
+            match typeArgs with
+            | [synType] ->
+                let name =
+                    match synType with
+                    | SynType.LongIdent(SynLongIdent(id = idents)) -> identToString idents
+                    | _ -> "unknown"
+                Some(box (AttrArgValue.TypeOf name))
+            | _ -> None
         | _ -> None
 
     let private tryExtractNamedArg (expr: SynExpr) : (string * obj) option =

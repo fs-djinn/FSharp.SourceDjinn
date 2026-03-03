@@ -1,7 +1,7 @@
 module FSharp.SourceDjinn.Tests.TypeKindExtractorTests
 
 open NUnit.Framework
-open FSharp.SourceDjinn.Types
+open FSharp.SourceDjinn.TypeModel.Types
 open FSharp.SourceDjinn
 
 [<Test>]
@@ -439,3 +439,36 @@ type X = { A: int }
     Assert.That(t.Attributes.[0].Name, Is.EqualTo("SerdeAttribute"))
     Assert.That(t.Attributes.[0].ConstructorArgs, Is.Empty)
     Assert.That(t.Attributes.[0].NamedArgs, Is.Empty)
+
+[<Test>]
+let ``Extracts positional typeof attribute argument`` () =
+    let source = """
+namespace TestNs
+
+[<MyAttr(typeof<MyNs.Converter>)>]
+type X = { A: int }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.Attributes.Length, Is.EqualTo(1))
+    Assert.That(t.Attributes.[0].Name, Is.EqualTo("MyAttrAttribute"))
+    Assert.That(t.Attributes.[0].ConstructorArgs.Length, Is.EqualTo(1))
+    Assert.That(t.Attributes.[0].ConstructorArgs.[0], Is.EqualTo(box (TypeKindExtractor.AttrArgValue.TypeOf "MyNs.Converter")))
+
+[<Test>]
+let ``Extracts named typeof attribute argument`` () =
+    let source = """
+namespace TestNs
+
+[<MyAttr(Converter = typeof<MyNs.Converter>)>]
+type X = { A: int }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.Attributes.Length, Is.EqualTo(1))
+    Assert.That(t.Attributes.[0].Name, Is.EqualTo("MyAttrAttribute"))
+    Assert.That(t.Attributes.[0].NamedArgs, Does.Contain(("Converter", box (TypeKindExtractor.AttrArgValue.TypeOf "MyNs.Converter"))))
