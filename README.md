@@ -1,31 +1,34 @@
 ### ✨ FSharp.SourceDjinn  
-A lightweight, intention‑revealing **F# source generation engine**. Djinn provides the building blocks for analyzers and code generators: AST parsing, type modeling, entry point detection, and a clean convention‑driven pipeline for emitting F# code.
+A lightweight, intention‑revealing **F# source generation engine**.  
+Djinn extracts **syntactic metadata** from F# code — types, attributes, modules, entry points — and presents it through a clean, backend‑agnostic model that analyzers and code generators can build on.
 
-Djinn powers the **Serde.FS** ecosystem, but it is fully independent and can be used by any F# source generator.
+Djinn powers the [**Serde.FS**](https://github.com/fs-djinn/Serde.FS) ecosystem, but it is fully independent and suitable for any F# source generator.
 
 ---
 
-### 🚀 Features
-
+### 🚀 What Djinn provides
 - Fast, dependency‑light F# AST parsing  
-- Type model extraction for records, unions, modules, and namespaces  
+- Stable type model extraction for records, unions, modules, and namespaces  
+- Attribute and constructor argument extraction (including `typeof<T>`)  
 - Entry point detection via `[<EntryPoint>]` or `FSharp.SourceDjinn.EntryPoint`  
-- Convention‑driven code emission  
+- Convention‑driven helpers for emitting F# code  
 - Analyzer‑friendly packaging (ships as a Roslyn analyzer)
+
+Djinn focuses on **syntax**, not semantics — it does not interpret types, resolve symbols, or perform type checking. This keeps it fast, predictable, and easy to embed.
 
 ---
 
 ### 📦 Installing
 
 ```xml
-<PackageReference Include="FSharp.SourceDjinn" Version="0.1.0" PrivateAssets="all" />
+<PackageReference Include="FSharp.SourceDjinn" Version="0.1.4" PrivateAssets="all" />
 ```
 
 Djinn is intended for use inside analyzers and source generators, not as a runtime dependency.
 
 ---
 
-### 🧩 Basic Usage
+### 🧪 Basic example: extracting types
 
 ```fsharp
 open FSharp.SourceDjinn
@@ -33,50 +36,49 @@ open FSharp.SourceDjinn
 let source = """
 module App
 
-[<EntryPoint>]
-let run argv = 0
+type Person = { Name: string; Age: int }
 """
 
-let entry = EntryPointDetector.detect "/test.fs" source
+let types = TypeModel.extract "/test.fs" source
 
-match entry with
-| Some ep -> printfn "Entry point: %s.%s" ep.ModuleName ep.FunctionName
-| None -> printfn "No entry point found"
+for t in types do
+    printfn "Found type: %s" t.Name
+```
+
+Output:
+
+```
+Found type: Person
 ```
 
 ---
 
-### 🧱 Architecture
+### 🧩 Architecture overview
 
-Djinn is built around three core components:
+Djinn is built around four small, composable components:
 
 - **AstParser** — parses F# source into a simplified AST  
-- **TypeModel** — extracts semantic information about types  
+- **TypeModel** — extracts records, unions, modules, namespaces, and attributes  
 - **EntryPointDetector** — finds top‑level entry points  
 - **Emitter** — helps generate F# code from conventions  
 
-These components are intentionally small and composable so that higher‑level libraries (like Serde.FS) can build on top of them.
-
----
-
-### 🧪 Status
-
-Djinn is early but stable enough for real use. The API may evolve as the ecosystem grows.
+These components are intentionally minimal so higher‑level libraries (like Serde.FS) can layer semantics and code generation on top.
 
 ---
 
 ### 📚 Ecosystem
 
-- **Serde.FS** — F# serialization library powered by Djinn  
-- **Serde.FS.SourceGen** — Serde compiler plugin  
-- **Serde.FS.SystemTextJson** — JSON backend  
+Projects built on Djinn:
+
+- **Serde.FS** — idiomatic F# serialization  
+- **Serde.FS.SourceGen** — compile‑time serializer generator  
+- **Serde.FS.Json** — System.Text.Json backend  
 
 All projects live under the **fs‑djinn** GitHub organization.
 
 ---
 
-### 📄 License
-
+### 📄 License  
 MIT
 
 ---
