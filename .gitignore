@@ -61,4 +61,5 @@ nunit-*.xml
 /src/Serde.FS.SystemTextJson/analyzers/dotnet/fs/*.dll
 /src/FSharp.SourceDjinn/analyzers/dotnet/fs/*.dll
 .nuget-local/
+.build/
 .debug-counter
