@@ -77,7 +77,7 @@ F# has a unique rule: the real `[<EntryPoint>]` function must appear **last in t
 To solve this, Djinn provides a lightweight marker attribute:
 
 ```fsharp
-[<FSharp.SourceDjinn.EntryPoint>]
+[<FSharp.SourceDjinn.TypeModel.EntryPoint>]
 ```
 
 This attribute is **not** the real entry point. Instead, it tells your generator:
