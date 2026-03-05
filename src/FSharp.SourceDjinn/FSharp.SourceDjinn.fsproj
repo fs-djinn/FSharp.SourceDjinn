@@ -7,7 +7,7 @@
 		<Description>F# source generation engine</Description>
 		<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
 		<Authors>Jordan Marr</Authors>
-		<Version>0.2.0</Version>
+		<Version>0.2.1</Version>
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
@@ -27,7 +27,7 @@
 	
 	<!-- Packing: use package reference -->
 	<ItemGroup Condition="'$(IsPack)' == 'true'">
-		<PackageReference Include="FSharp.SourceDjinn.TypeModel" Version="0.1.1" PrivateAssets="all" />
+		<PackageReference Include="FSharp.SourceDjinn.TypeModel" Version="0.2.1" PrivateAssets="all" />
 	</ItemGroup>
 	
 	<ItemGroup>

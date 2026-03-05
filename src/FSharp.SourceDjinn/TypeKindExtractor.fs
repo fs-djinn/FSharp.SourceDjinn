@@ -208,8 +208,13 @@ module TypeKindExtractor =
                       GenericParameters = []; GenericArguments = [] }
 
             else
-                { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
-                  GenericParameters = []; GenericArguments = [] }
+                let resolvedArgs = typeArgs |> List.map synTypeToTypeInfo
+                if resolvedArgs.IsEmpty then
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
+                else
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = ConstructedGenericType; Attributes = []
+                      GenericParameters = []; GenericArguments = resolvedArgs }
 
         | SynType.Tuple(_isStruct, segments, _) ->
             let types =

@@ -587,3 +587,26 @@ type Box<'T> = { Value: 'T }
         Assert.That(fields.[0].Name, Is.EqualTo("Value"))
         Assert.That(fields.[0].Type.Kind, Is.EqualTo(Primitive Int32))
     | other -> Assert.Fail(sprintf "Expected Record kind, got %A" other)
+
+[<Test>]
+let ``Extracts constructed generic type in field type annotation`` () =
+    let source = """
+namespace TestNs
+
+type Wrapper<'T> = Wrapper of 'T
+type Person = { Name: string }
+type Container = { Item: Wrapper<Person> }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(3))
+
+    let container = types |> List.find (fun t -> t.TypeName = "Container")
+    match container.Kind with
+    | Record fields ->
+        Assert.That(fields.Length, Is.EqualTo(1))
+        let fieldType = fields.[0].Type
+        Assert.That(fieldType.TypeName, Is.EqualTo("Wrapper"))
+        Assert.That(fieldType.Kind, Is.EqualTo(ConstructedGenericType))
+        Assert.That(fieldType.GenericArguments.Length, Is.EqualTo(1))
+        Assert.That(fieldType.GenericArguments.[0].TypeName, Is.EqualTo("Person"))
+    | other -> Assert.Fail(sprintf "Expected Record kind, got %A" other)
