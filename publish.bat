@@ -14,7 +14,7 @@ dotnet pack "%TYPEMODEL_PROJ%" -c Release /p:IsPack=true -o "%BUILD_DIR%"
 if errorlevel 1 goto :fail
 
 echo Packing Djinn...
-dotnet pack "%DJINN_PROJ%" -c Release /p:IsPack=true -o "%BUILD_DIR%"
+dotnet pack "%DJINN_PROJ%" -c Release /p:IsPack=true -o "%BUILD_DIR%" --source "%BUILD_DIR%" --source https://api.nuget.org/v3/index.json
 if errorlevel 1 goto :fail
 
 echo.
