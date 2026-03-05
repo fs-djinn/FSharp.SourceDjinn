@@ -5,7 +5,7 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
 		<PackageId>FSharp.SourceDjinn.TypeModel</PackageId>
-		<Version>0.2.1</Version>
+		<Version>0.2.2</Version>
 		<Description>Type model used by FSharp.SourceDjinn for representing F# types.</Description>
 		<Authors>Jordan Marr</Authors>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
