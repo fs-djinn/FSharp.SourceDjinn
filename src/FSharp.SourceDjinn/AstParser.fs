@@ -29,3 +29,9 @@ module AstParser =
         let sourceText = System.IO.File.ReadAllText(filePath)
         TypeKindExtractor.extractTypes filePath sourceText
 
+    // ── Call-site type argument extraction ─────────────────────────────
+
+    /// Extract explicit type arguments from calls to the named functions in the given source.
+    let extractCallTypeArgs (functionNames: Set<string>) (filePath: string) (sourceText: string) : TypeInfo list =
+        CallTypeArgExtractor.extractCallTypeArgs functionNames filePath sourceText
+

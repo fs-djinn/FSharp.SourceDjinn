@@ -134,7 +134,7 @@ module TypeKindExtractor =
         | Some (SynTyparDecls.SinglePrefix(SynTyparDecl(typar = SynTypar(ident, _, _)), _)) ->
             [ { Name = ident.idText; Constraints = [] } ]
 
-    let rec private synTypeToTypeInfo (synType: SynType) : TypeInfo =
+    let rec internal synTypeToTypeInfo (synType: SynType) : TypeInfo =
         match synType with
         | SynType.Var(SynTypar(ident, _, _), _) ->
             { Namespace = None; EnclosingModules = []; TypeName = ident.idText
