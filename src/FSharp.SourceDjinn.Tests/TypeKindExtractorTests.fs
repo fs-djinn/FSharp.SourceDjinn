@@ -472,3 +472,118 @@ type X = { A: int }
     Assert.That(t.Attributes.Length, Is.EqualTo(1))
     Assert.That(t.Attributes.[0].Name, Is.EqualTo("MyAttrAttribute"))
     Assert.That(t.Attributes.[0].NamedArgs, Does.Contain(("Converter", box (TypeKindExtractor.AttrArgValue.TypeOf "MyNs.Converter"))))
+
+// --- Generic type extraction tests (Spec 28) ---
+
+[<Test>]
+let ``Extracts generic record with single type parameter`` () =
+    let source = """
+namespace TestNs
+
+type Box<'T> = { Value: 'T }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.TypeName, Is.EqualTo("Box"))
+    Assert.That(t.IsGenericDefinition, Is.True)
+    Assert.That(t.GenericParameters.Length, Is.EqualTo(1))
+    Assert.That(t.GenericParameters.[0].Name, Is.EqualTo("T"))
+    Assert.That(t.GenericArguments, Is.Empty)
+
+    match t.Kind with
+    | Record fields ->
+        Assert.That(fields.Length, Is.EqualTo(1))
+        Assert.That(fields.[0].Name, Is.EqualTo("Value"))
+        Assert.That(fields.[0].Type.Kind, Is.EqualTo(GenericParameter "T"))
+    | other -> Assert.Fail(sprintf "Expected Record kind, got %A" other)
+
+[<Test>]
+let ``Extracts generic union with single type parameter`` () =
+    let source = """
+namespace TestNs
+
+type Wrapper<'T> =
+    | Wrap of 'T
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.TypeName, Is.EqualTo("Wrapper"))
+    Assert.That(t.IsGenericDefinition, Is.True)
+    Assert.That(t.GenericParameters.Length, Is.EqualTo(1))
+    Assert.That(t.GenericParameters.[0].Name, Is.EqualTo("T"))
+
+    match t.Kind with
+    | Union cases ->
+        Assert.That(cases.Length, Is.EqualTo(1))
+        Assert.That(cases.[0].CaseName, Is.EqualTo("Wrap"))
+        Assert.That(cases.[0].Fields.[0].Type.Kind, Is.EqualTo(GenericParameter "T"))
+    | other -> Assert.Fail(sprintf "Expected Union kind, got %A" other)
+
+[<Test>]
+let ``Extracts generic record with multiple type parameters`` () =
+    let source = """
+namespace TestNs
+
+type Pair<'A, 'B> = { First: 'A; Second: 'B }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.TypeName, Is.EqualTo("Pair"))
+    Assert.That(t.IsGenericDefinition, Is.True)
+    Assert.That(t.GenericParameters.Length, Is.EqualTo(2))
+    Assert.That(t.GenericParameters.[0].Name, Is.EqualTo("A"))
+    Assert.That(t.GenericParameters.[1].Name, Is.EqualTo("B"))
+
+    match t.Kind with
+    | Record fields ->
+        Assert.That(fields.Length, Is.EqualTo(2))
+        Assert.That(fields.[0].Type.Kind, Is.EqualTo(GenericParameter "A"))
+        Assert.That(fields.[1].Type.Kind, Is.EqualTo(GenericParameter "B"))
+    | other -> Assert.Fail(sprintf "Expected Record kind, got %A" other)
+
+[<Test>]
+let ``Non-generic types have empty GenericParameters`` () =
+    let source = """
+namespace TestNs
+
+type Person = { Name: string; Age: int }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    Assert.That(types.Length, Is.EqualTo(1))
+
+    let t = types.[0]
+    Assert.That(t.IsGenericDefinition, Is.False)
+    Assert.That(t.GenericParameters, Is.Empty)
+    Assert.That(t.GenericArguments, Is.Empty)
+
+[<Test>]
+let ``TypeInfo.instantiate substitutes generic parameters`` () =
+    let source = """
+namespace TestNs
+
+type Box<'T> = { Value: 'T }
+"""
+    let types = TypeKindExtractor.extractTypes "/test.fs" source
+    let boxDef = types.[0]
+
+    let intType = { Namespace = None; EnclosingModules = []; TypeName = "int"
+                    Kind = Primitive Int32; Attributes = []
+                    GenericParameters = []; GenericArguments = [] }
+
+    let constructed = TypeInfo.instantiate boxDef [intType]
+    Assert.That(constructed.IsConstructedGeneric, Is.True)
+    Assert.That(constructed.IsGenericDefinition, Is.False)
+    Assert.That(constructed.GenericArguments.Length, Is.EqualTo(1))
+    Assert.That(constructed.GenericArguments.[0].Kind, Is.EqualTo(Primitive Int32))
+
+    match constructed.Kind with
+    | Record fields ->
+        Assert.That(fields.[0].Name, Is.EqualTo("Value"))
+        Assert.That(fields.[0].Type.Kind, Is.EqualTo(Primitive Int32))
+    | other -> Assert.Fail(sprintf "Expected Record kind, got %A" other)

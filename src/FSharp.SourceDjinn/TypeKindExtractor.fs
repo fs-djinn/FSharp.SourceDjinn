@@ -124,15 +124,32 @@ module TypeKindExtractor =
         |> List.collect (fun attrList -> attrList.Attributes)
         |> List.map extractAttributeInfo
 
+    let private extractGenericParams (typeParams: SynTyparDecls option) : GenericParameterInfo list =
+        match typeParams with
+        | None -> []
+        | Some (SynTyparDecls.PostfixList(decls, _, _))
+        | Some (SynTyparDecls.PrefixList(decls, _)) ->
+            decls |> List.map (fun (SynTyparDecl(typar = SynTypar(ident, _, _))) ->
+                { Name = ident.idText; Constraints = [] })
+        | Some (SynTyparDecls.SinglePrefix(SynTyparDecl(typar = SynTypar(ident, _, _)), _)) ->
+            [ { Name = ident.idText; Constraints = [] } ]
+
     let rec private synTypeToTypeInfo (synType: SynType) : TypeInfo =
         match synType with
+        | SynType.Var(SynTypar(ident, _, _), _) ->
+            { Namespace = None; EnclosingModules = []; TypeName = ident.idText
+              Kind = GenericParameter ident.idText; Attributes = []
+              GenericParameters = []; GenericArguments = [] }
+
         | SynType.LongIdent(SynLongIdent(id = idents)) ->
             let name = identToString idents
             match Map.tryFind name primitiveMap with
             | Some pk ->
-                { Namespace = None; EnclosingModules = []; TypeName = name; Kind = Primitive pk; Attributes = [] }
+                { Namespace = None; EnclosingModules = []; TypeName = name; Kind = Primitive pk; Attributes = []
+                  GenericParameters = []; GenericArguments = [] }
             | None ->
-                { Namespace = None; EnclosingModules = []; TypeName = name; Kind = Record []; Attributes = [] }
+                { Namespace = None; EnclosingModules = []; TypeName = name; Kind = Record []; Attributes = []
+                  GenericParameters = []; GenericArguments = [] }
 
         | SynType.App(typeName, _, typeArgs, _, _, _isPostfix, _) ->
             let baseName =
@@ -144,44 +161,55 @@ module TypeKindExtractor =
                 match typeArgs with
                 | [inner] ->
                     { Namespace = None; EnclosingModules = []; TypeName = "option"
-                      Kind = Option(synTypeToTypeInfo inner); Attributes = [] }
+                      Kind = Option(synTypeToTypeInfo inner); Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
                 | _ ->
-                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
 
             elif listNames.Contains baseName then
                 match typeArgs with
                 | [inner] ->
                     { Namespace = None; EnclosingModules = []; TypeName = "list"
-                      Kind = List(synTypeToTypeInfo inner); Attributes = [] }
+                      Kind = List(synTypeToTypeInfo inner); Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
                 | _ ->
-                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
 
             elif arrayNames.Contains baseName then
                 match typeArgs with
                 | [inner] ->
                     { Namespace = None; EnclosingModules = []; TypeName = "array"
-                      Kind = Array(synTypeToTypeInfo inner); Attributes = [] }
+                      Kind = Array(synTypeToTypeInfo inner); Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
                 | _ ->
-                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
 
             elif setNames.Contains baseName then
                 match typeArgs with
                 | [inner] ->
                     { Namespace = None; EnclosingModules = []; TypeName = "Set"
-                      Kind = Set(synTypeToTypeInfo inner); Attributes = [] }
+                      Kind = Set(synTypeToTypeInfo inner); Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
                 | _ ->
-                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
 
             elif mapNames.Contains baseName then
                 match typeArgs with
                 | [keyType; valueType] ->
                     { Namespace = None; EnclosingModules = []; TypeName = "Map"
-                      Kind = Map(synTypeToTypeInfo keyType, synTypeToTypeInfo valueType); Attributes = [] }
+                      Kind = Map(synTypeToTypeInfo keyType, synTypeToTypeInfo valueType); Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
                 | _ ->
-                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                    { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                      GenericParameters = []; GenericArguments = [] }
 
             else
-                { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = [] }
+                { Namespace = None; EnclosingModules = []; TypeName = baseName; Kind = Record []; Attributes = []
+                  GenericParameters = []; GenericArguments = [] }
 
         | SynType.Tuple(_isStruct, segments, _) ->
             let types =
@@ -194,24 +222,28 @@ module TypeKindExtractor =
                 types
                 |> List.mapi (fun i t ->
                     { Name = sprintf "Item%d" (i + 1); Type = synTypeToTypeInfo t; Attributes = [] })
-            { Namespace = None; EnclosingModules = []; TypeName = "tuple"; Kind = Tuple fields; Attributes = [] }
+            { Namespace = None; EnclosingModules = []; TypeName = "tuple"; Kind = Tuple fields; Attributes = []
+              GenericParameters = []; GenericArguments = [] }
 
         | SynType.Array(_, elementType, _) ->
             { Namespace = None; EnclosingModules = []; TypeName = "array"
-              Kind = Array(synTypeToTypeInfo elementType); Attributes = [] }
+              Kind = Array(synTypeToTypeInfo elementType); Attributes = []
+              GenericParameters = []; GenericArguments = [] }
 
         | SynType.AnonRecd(_isStruct, fields, _) ->
             let fieldInfos =
                 fields
                 |> List.map (fun (ident, synTy) ->
                     { Name = ident.idText; Type = synTypeToTypeInfo synTy; Attributes = [] })
-            { Namespace = None; EnclosingModules = []; TypeName = ""; Kind = AnonymousRecord fieldInfos; Attributes = [] }
+            { Namespace = None; EnclosingModules = []; TypeName = ""; Kind = AnonymousRecord fieldInfos; Attributes = []
+              GenericParameters = []; GenericArguments = [] }
 
         | SynType.Paren(innerType, _) ->
             synTypeToTypeInfo innerType
 
         | _ ->
-            { Namespace = None; EnclosingModules = []; TypeName = "unknown"; Kind = Record []; Attributes = [] }
+            { Namespace = None; EnclosingModules = []; TypeName = "unknown"; Kind = Record []; Attributes = []
+              GenericParameters = []; GenericArguments = [] }
 
     let private extractRecordFields (fields: SynField list) : FieldInfo list =
         fields
@@ -256,9 +288,10 @@ module TypeKindExtractor =
 
     let private processTypeDefn (ns: string option) (modules: string list) (typeDefn: SynTypeDefn) : TypeInfo option =
         let (SynTypeDefn(typeInfo = synComponentInfo; typeRepr = typeRepr)) = typeDefn
-        let (SynComponentInfo(attributes = attrs; longId = typeNameIdent)) = synComponentInfo
+        let (SynComponentInfo(attributes = attrs; longId = typeNameIdent; typeParams = typeParams)) = synComponentInfo
         let typeName = typeNameIdent |> List.map (fun i -> i.idText) |> String.concat "."
         let typeAttrs = extractAttributes attrs
+        let genericParams = extractGenericParams typeParams
 
         match typeRepr with
         | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Record(_, fields, _), _) ->
@@ -268,6 +301,8 @@ module TypeKindExtractor =
                 TypeName = typeName
                 Kind = Record(extractRecordFields fields)
                 Attributes = typeAttrs
+                GenericParameters = genericParams
+                GenericArguments = []
             }
         | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Union(_, cases, _), _) ->
             Some {
@@ -276,6 +311,8 @@ module TypeKindExtractor =
                 TypeName = typeName
                 Kind = Union(extractUnionCases cases)
                 Attributes = typeAttrs
+                GenericParameters = genericParams
+                GenericArguments = []
             }
         | SynTypeDefnRepr.Simple(SynTypeDefnSimpleRepr.Enum(cases, _), _) ->
             Some {
@@ -284,6 +321,8 @@ module TypeKindExtractor =
                 TypeName = typeName
                 Kind = Enum(extractEnumCases cases)
                 Attributes = typeAttrs
+                GenericParameters = genericParams
+                GenericArguments = []
             }
         | _ -> None
 
