@@ -7,13 +7,18 @@
 		<Description>F# source generation engine</Description>
 		<PackageTags>fsharp;source-generator;fs-djinn;djinn;analyzers;codegen</PackageTags>
 		<Authors>Jordan Marr</Authors>
-		<Version>0.1.4</Version>
+		<Version>0.2.0</Version>
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<IncludeBuildOutput>true</IncludeBuildOutput>
 		<IncludeAnalyzer>true</IncludeAnalyzer>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 	<!-- Development: use project reference -->
 	<ItemGroup Condition="'$(IsPack)' != 'true'">
