@@ -6,9 +6,8 @@ module EntryPointEmitter =
         "namespace FSharp.SourceDjinn.Generated\n" +
         "\n" +
         "module internal DjinnBootstrap =\n" +
-        "    let mutable private conventionBootstrapWasCalled = false\n" +
         "\n" +
-        "    let tryConventionBootstrap () =\n" +
+        "    let runBootstraps () =\n" +
         "        try\n" +
         "            // Ensure referenced assemblies are loaded\n" +
         "            let entry = System.Reflection.Assembly.GetEntryAssembly()\n" +
@@ -16,27 +15,19 @@ module EntryPointEmitter =
         "                for name in entry.GetReferencedAssemblies() do\n" +
         "                    try System.Reflection.Assembly.Load(name) |> ignore with _ -> ()\n" +
         "\n" +
-        "            // Search all loaded assemblies for the convention bootstrap\n" +
+        "            // Discover and run all IBootstrap implementors\n" +
         "            for asm in System.AppDomain.CurrentDomain.GetAssemblies() do\n" +
-        "                match asm.GetType(\"" + Conventions.ConventionBootstrapType + "\") with\n" +
-        "                | null -> ()\n" +
-        "                | ty ->\n" +
-        "                    let m =\n" +
-        "                        ty.GetMethod(\n" +
-        "                            \"" + Conventions.ConventionBootstrapMethod + "\",\n" +
-        "                            System.Reflection.BindingFlags.Public\n" +
-        "                            ||| System.Reflection.BindingFlags.Static)\n" +
-        "                    if not (isNull m) && m.GetParameters().Length = 0 then\n" +
-        "                        m.Invoke(null, [||]) |> ignore\n" +
-        "                        conventionBootstrapWasCalled <- true\n" +
+        "                let types =\n" +
+        "                    try asm.GetTypes()\n" +
+        "                    with :? System.Reflection.ReflectionTypeLoadException as ex ->\n" +
+        "                        ex.Types |> Array.filter (fun t -> not (isNull t))\n" +
+        "                for ty in types do\n" +
+        "                    if typeof<FSharp.SourceDjinn.TypeModel.IBootstrap>.IsAssignableFrom(ty)\n" +
+        "                       && not ty.IsInterface\n" +
+        "                       && not ty.IsAbstract then\n" +
+        "                        let instance = System.Activator.CreateInstance(ty) :?> FSharp.SourceDjinn.TypeModel.IBootstrap\n" +
+        "                        instance.Init()\n" +
         "        with _ -> ()\n" +
         "\n" +
-        "    let fallbackToReflectionBootstrap () =\n" +
-        "        if conventionBootstrapWasCalled then ()\n" +
-        "        else\n" +
-        "            // Minimal stub — no Djinn-owned metadata to activate yet.\n" +
-        "            // Can be extended later for Djinn-scoped registrations.\n" +
-        "            ()\n" +
-        "\n" +
-        sprintf "module DjinnEntryPoint =\n\n    [<EntryPoint>]\n    let main argv =\n        DjinnBootstrap.tryConventionBootstrap ()\n        DjinnBootstrap.fallbackToReflectionBootstrap ()\n        %s.%s argv\n"
+        sprintf "module DjinnEntryPoint =\n\n    [<EntryPoint>]\n    let main argv =\n        DjinnBootstrap.runBootstraps ()\n        %s.%s argv\n"
             info.ModuleName info.FunctionName
