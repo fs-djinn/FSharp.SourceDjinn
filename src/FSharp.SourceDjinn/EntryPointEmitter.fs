@@ -15,17 +15,17 @@ module EntryPointEmitter =
         "                for name in entry.GetReferencedAssemblies() do\n" +
         "                    try System.Reflection.Assembly.Load(name) |> ignore with _ -> ()\n" +
         "\n" +
-        "            // Discover and run all IBootstrap implementors\n" +
+        "            // Discover and run all IEntryPointBootstrap implementors\n" +
         "            for asm in System.AppDomain.CurrentDomain.GetAssemblies() do\n" +
         "                let types =\n" +
         "                    try asm.GetTypes()\n" +
         "                    with :? System.Reflection.ReflectionTypeLoadException as ex ->\n" +
         "                        ex.Types |> Array.filter (fun t -> not (isNull t))\n" +
         "                for ty in types do\n" +
-        "                    if typeof<FSharp.SourceDjinn.TypeModel.IBootstrap>.IsAssignableFrom(ty)\n" +
+        sprintf "                    if typeof<%s>.IsAssignableFrom(ty)\n" info.BootstrapInterface +
         "                       && not ty.IsInterface\n" +
         "                       && not ty.IsAbstract then\n" +
-        "                        let instance = System.Activator.CreateInstance(ty) :?> FSharp.SourceDjinn.TypeModel.IBootstrap\n" +
+        sprintf "                        let instance = System.Activator.CreateInstance(ty) :?> %s\n" info.BootstrapInterface +
         "                        instance.Init()\n" +
         "        with _ -> ()\n" +
         "\n" +
